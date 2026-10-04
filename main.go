@@ -7,11 +7,6 @@ import (
 	"github.com/alex-glez-felix/wave-collapse/wfc"
 )
 
-type Position struct {
-	X int
-	Y int
-}
-
 func main() {
 	s1 := rand.Uint64()
 	s2 := rand.Uint64()
