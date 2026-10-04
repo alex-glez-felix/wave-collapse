@@ -30,18 +30,22 @@ func (c Cell) Allowed(d Direction) Cell {
 }
 
 func (c Cell) Collapse(r *rand.Rand) Cell {
-	// Creo que esto era justo para reservar memoria supongo ayuda en este caso
-	// Aunque debe haber una forma mas eficiente de hacer esto, pero primero quiero algo que funcione
-	var tiles = make([]Tile, 0, NumTiles)
 
-	for tile := range NumTiles {
-		if c.Has(tile) {
-			tiles = append(tiles, tile)
-		}
+	if c == 0 {
+		panic("wfc: Collapse called on empty cell")
 	}
 
-	pick := r.IntN(len(tiles))
-	return CellOf(tiles[pick])
+	pick := r.IntN(c.Count())
+	for tile := range NumTiles {
+		if !c.Has(tile) {
+			continue
+		}
+		if pick == 0 {
+			return CellOf(tile)
+		}
+		pick--
+	}
+	return 0
 
 }
 
