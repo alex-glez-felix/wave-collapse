@@ -16,3 +16,22 @@ func (c Cell) Count() int {
 func (c Cell) Without(t Tile) Cell {
 	return c &^ t.Bit()
 }
+
+func (c Cell) Allowed(d Direction) Cell {
+
+	var allowed Cell
+	for tile := range NumTiles {
+		if c.Has(tile) {
+			allowed = allowed | tile.Allowed(d)
+		}
+	}
+	return allowed
+}
+
+func CellOf(tiles ...Tile) Cell {
+	var cell Cell
+	for _, tile := range tiles {
+		cell = cell | tile.Bit()
+	}
+	return cell
+}
