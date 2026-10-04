@@ -5,8 +5,7 @@ import "math/bits"
 type Cell uint64
 
 func (c Cell) Has(t Tile) bool {
-	a := c & t.Bit()
-	return a > 0
+	return c&t.Bit() > 0
 }
 
 func (c Cell) Count() int {
@@ -18,11 +17,10 @@ func (c Cell) Without(t Tile) Cell {
 }
 
 func (c Cell) Allowed(d Direction) Cell {
-
 	var allowed Cell
 	for tile := range NumTiles {
 		if c.Has(tile) {
-			allowed = allowed | tile.Allowed(d)
+			allowed |= tile.Allowed(d)
 		}
 	}
 	return allowed
@@ -31,7 +29,7 @@ func (c Cell) Allowed(d Direction) Cell {
 func CellOf(tiles ...Tile) Cell {
 	var cell Cell
 	for _, tile := range tiles {
-		cell = cell | tile.Bit()
+		cell |= tile.Bit()
 	}
 	return cell
 }
