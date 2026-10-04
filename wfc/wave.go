@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand/v2"
+	"strings"
 )
 
 var ErrContradiction = errors.New("wfc: contradiction")
@@ -16,7 +17,6 @@ type Wave struct {
 }
 
 func NewWave(width, height int) *Wave {
-
 	grid := make([]Cell, width*height)
 	for i := range width * height {
 		grid[i] = AllTiles
@@ -27,6 +27,23 @@ func NewWave(width, height int) *Wave {
 		width:  width,
 		height: height,
 	}
+}
+
+func (w *Wave) Run(r *rand.Rand) error {
+
+	for {
+		lowest, ok := w.lowestEntropy(r)
+		if !ok {
+			return nil
+		}
+
+		w.collapse(r, lowest)
+		err := w.propagate(lowest)
+		if err != nil {
+			return err
+		}
+	}
+
 }
 
 func (w *Wave) lowestEntropy(r *rand.Rand) (int, bool) {
@@ -116,4 +133,19 @@ func (w *Wave) neighbor(i int, d Direction) (int, bool) {
 		return 0, false
 	}
 	return w.index(nx, ny), true
+}
+
+func (w *Wave) String() string {
+	var b strings.Builder
+	for y := range w.height {
+		for x := range w.width {
+			tile, ok := w.grid[w.index(x, y)].Tile()
+			if !ok {
+				b.WriteRune('?')
+			}
+			b.WriteRune(tile.Glyph())
+		}
+		b.WriteByte('\n')
+	}
+	return b.String()
 }

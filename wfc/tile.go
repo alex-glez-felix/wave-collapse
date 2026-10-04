@@ -44,12 +44,18 @@ var rules = [NumTiles][NumDirections]Cell{
 	},
 }
 
+var compatible = [NumTiles]Cell{
+	Water: CellOf(Water, Sand),
+	Sand:  AllTiles,
+	Grass: CellOf(Grass, Sand),
+}
+
 func (t Tile) Bit() Cell {
 	return 1 << t
 }
 
 func (t Tile) Allowed(d Direction) Cell {
-	return rules[t][d]
+	return compatible[t]
 }
 
 func (t Tile) String() string {
@@ -62,5 +68,18 @@ func (t Tile) String() string {
 		return "Grass"
 	default:
 		return fmt.Sprintf("Tile(%d)", t)
+	}
+}
+
+func (t Tile) Glyph() rune {
+	switch t {
+	case Water:
+		return '.'
+	case Sand:
+		return '~'
+	case Grass:
+		return '#'
+	default:
+		return '?'
 	}
 }

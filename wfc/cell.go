@@ -29,6 +29,13 @@ func (c Cell) Allowed(d Direction) Cell {
 	return allowed
 }
 
+func (c Cell) Tile() (Tile, bool) {
+	if c.Count() != 1 {
+		return 0, false
+	}
+	return Tile(bits.TrailingZeros64(uint64(c))), true
+}
+
 func (c Cell) Collapse(r *rand.Rand) Cell {
 
 	if c == 0 {
