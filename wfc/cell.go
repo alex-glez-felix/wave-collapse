@@ -1,6 +1,9 @@
 package wfc
 
-import "math/bits"
+import (
+	"math/bits"
+	"math/rand/v2"
+)
 
 type Cell uint64
 
@@ -24,6 +27,22 @@ func (c Cell) Allowed(d Direction) Cell {
 		}
 	}
 	return allowed
+}
+
+func (c Cell) Collapse(r *rand.Rand) Cell {
+	// Creo que esto era justo para reservar memoria supongo ayuda en este caso
+	// Aunque debe haber una forma mas eficiente de hacer esto, pero primero quiero algo que funcione
+	var tiles = make([]Tile, 0, NumTiles)
+
+	for tile := range NumTiles {
+		if c.Has(tile) {
+			tiles = append(tiles, tile)
+		}
+	}
+
+	pick := r.IntN(len(tiles))
+	return CellOf(tiles[pick])
+
 }
 
 func CellOf(tiles ...Tile) Cell {

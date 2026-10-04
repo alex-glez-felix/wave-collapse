@@ -1,6 +1,9 @@
 package wfc
 
-import "testing"
+import (
+	"math/rand/v2"
+	"testing"
+)
 
 func TestCellHas(t *testing.T) {
 	tests := []struct {
@@ -85,6 +88,28 @@ func TestCellOf(t *testing.T) {
 				t.Errorf("CellOf(%v) = %v, want %v", tt.of, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestCellCollapse(t *testing.T) {
+	r := rand.New(rand.NewPCG(1, 2))
+	c := CellOf(Water, Grass)
+
+	var seen Cell
+
+	for range 100 {
+		got := c.Collapse(r)
+		if got.Count() != 1 {
+			t.Fatalf("Collapse(%04b) = %04b, want exactly one tile", c, got)
+		}
+		if got&c != got {
+			t.Fatalf("Collapse(%04b) = %04b, not a subset", c, got)
+		}
+		seen |= got
+	}
+
+	if seen != c {
+		t.Errorf("after 100 collapses saw %04b, want all of %04b", seen, c)
 	}
 }
 
