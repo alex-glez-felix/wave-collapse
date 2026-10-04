@@ -30,19 +30,20 @@ type tileInfo struct {
 	name  string
 	glyph rune
 	rules [NumDirections]Cell
+	color uint8
 }
 
 type TileSet struct {
 	tiles []tileInfo
 }
 
-func (ts *TileSet) Add(name string, glyph rune) Tile {
+func (ts *TileSet) Add(name string, glyph rune, color uint8) Tile {
 	if len(ts.tiles) >= 64 {
 		panic("wfc: Cannot add more than 64 tiles to a single tileset")
 	}
 
 	tile := Tile(len(ts.tiles))
-	ts.tiles = append(ts.tiles, tileInfo{name: name, glyph: glyph})
+	ts.tiles = append(ts.tiles, tileInfo{name: name, glyph: glyph, color: color})
 	return tile
 }
 

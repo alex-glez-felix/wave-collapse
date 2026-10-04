@@ -7,9 +7,9 @@ import (
 
 func testTileSet() (*TileSet, Tile, Tile, Tile) {
 	var ts TileSet
-	water := ts.Add("water", '~')
-	sand := ts.Add("sand", '.')
-	grass := ts.Add("grass", '#')
+	water := ts.Add("water", '~', 0)
+	sand := ts.Add("sand", '.', 0)
+	grass := ts.Add("grass", '#', 0)
 	ts.Connect(water, water)
 	ts.Connect(water, sand)
 	ts.Connect(sand, sand)
@@ -46,7 +46,7 @@ func TestTileSetAddReturnsSequentialIndices(t *testing.T) {
 
 	names := []string{"Water", "Sand", "Grass"}
 	for want, name := range names {
-		got := ts.Add(name, '?')
+		got := ts.Add(name, '?', 0)
 		if got != Tile(want) {
 			t.Errorf("Add(%q) = %d, want %d", name, got, want)
 		}
@@ -59,7 +59,7 @@ func TestTileSetAddReturnsSequentialIndices(t *testing.T) {
 
 func TestTileSetAddStoresInfo(t *testing.T) {
 	var ts TileSet
-	tile := ts.Add("Water", '~')
+	tile := ts.Add("Water", '~', 0)
 
 	info := ts.tiles[tile]
 	if info.name != "Water" || info.glyph != '~' {
@@ -75,7 +75,7 @@ func TestTileSetAddStoresInfo(t *testing.T) {
 func TestTileSetAddPanicsOverLimit(t *testing.T) {
 	var ts TileSet
 	for range 64 {
-		ts.Add("t", '?')
+		ts.Add("t", '?', 0)
 	}
 
 	defer func() {
@@ -83,7 +83,7 @@ func TestTileSetAddPanicsOverLimit(t *testing.T) {
 			t.Errorf("Add beyond 64 tiles did not panic")
 		}
 	}()
-	ts.Add("one too many", '?')
+	ts.Add("one too many", '?', 0)
 }
 
 func assertSymmetric(t *testing.T, ts *TileSet) {
@@ -104,9 +104,9 @@ func assertSymmetric(t *testing.T, ts *TileSet) {
 
 func TestTileSetConnectSymmetry(t *testing.T) {
 	var ts TileSet
-	water := ts.Add("Water", '~')
-	sand := ts.Add("Sand", '.')
-	grass := ts.Add("Grass", '#')
+	water := ts.Add("Water", '~', 0)
+	sand := ts.Add("Sand", '.', 0)
+	grass := ts.Add("Grass", '#', 0)
 
 	ts.Connect(water, water)
 	ts.Connect(water, sand)
@@ -130,7 +130,7 @@ func TestTileSetAll(t *testing.T) {
 		t.Run(fmt.Sprint(tt.n), func(t *testing.T) {
 			var ts TileSet
 			for range tt.n {
-				ts.Add("t", '?')
+				ts.Add("t", '?', 0)
 			}
 			if got := ts.All(); got != tt.want {
 				t.Errorf("All() with %d tiles = %b, want %b", tt.n, got, tt.want)

@@ -145,8 +145,27 @@ func (w *Wave) String() string {
 				b.WriteRune('?')
 			}
 			b.WriteRune(w.tiles.tiles[tile].glyph)
+			b.WriteRune(w.tiles.tiles[tile].glyph)
 		}
 		b.WriteByte('\n')
+	}
+	return b.String()
+}
+
+func (w *Wave) Render() string {
+	var b strings.Builder
+	for y := range w.height {
+		for x := range w.width {
+			cell := w.grid[w.index(x, y)]
+			tile, ok := cell.Tile()
+			if !ok {
+				b.WriteString("??") // celda sin colapsar
+				continue
+			}
+			color := w.tiles.tiles[tile].color
+			fmt.Fprintf(&b, "\x1b[48;5;%dm  ", color)
+		}
+		b.WriteString("\x1b[0m\n")
 	}
 	return b.String()
 }

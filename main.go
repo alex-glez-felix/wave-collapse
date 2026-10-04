@@ -18,23 +18,38 @@ func main() {
 	fmt.Printf("s1: %v, s2: %v\n", s1, s2)
 	r := rand.New(rand.NewPCG(s1, s2))
 
-	ts := wfc.TileSet{}
-	water := ts.Add("water", '~')
-	sand := ts.Add("sand", '.')
-	grass := ts.Add("grass", '#')
-	ts.Connect(water, water)
-	ts.Connect(water, sand)
-	ts.Connect(sand, sand)
-	ts.Connect(grass, sand)
-	ts.Connect(grass, grass)
+	defs := []struct {
+		name  string
+		glyph rune
+		color uint8
+	}{
+		{"deep", '~', 18},
+		{"water", '~', 33},
+		{"sand", '.', 229},
+		{"grass", '"', 70},
+		{"forest", '♣', 22},
+		{"mountain", '^', 244},
+		{"snow", '*', 255},
+	}
+
+	var ts wfc.TileSet
+	var prev wfc.Tile
+	for i, d := range defs {
+		tile := ts.Add(d.name, d.glyph, d.color)
+		ts.Connect(tile, tile)
+		if i > 0 {
+			ts.Connect(prev, tile)
+		}
+		prev = tile
+	}
 
 	for attempt := range 100 {
-		wave := wfc.NewWave(20, 20, &ts)
+		wave := wfc.NewWave(50, 50, &ts)
 		if err := wave.Run(r); err != nil {
 			continue
 		}
 		fmt.Printf("Attempt: %v\n", attempt)
-		fmt.Println(wave)
+		fmt.Println(wave.Render())
 		return
 	}
 	fmt.Println("no solution after 100 attempts")
