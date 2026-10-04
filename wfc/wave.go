@@ -11,12 +11,12 @@ import (
 var ErrContradiction = errors.New("wfc: contradiction")
 
 type Wave struct {
-	grid   []Cell
-	width  int
-	height int
+	grid          []Cell
+	width, height int
+	tiles         *TileSet
 }
 
-func NewWave(width, height int) *Wave {
+func NewWave(width, height int, tiles *TileSet) *Wave {
 	grid := make([]Cell, width*height)
 	for i := range width * height {
 		grid[i] = AllTiles
@@ -26,6 +26,7 @@ func NewWave(width, height int) *Wave {
 		grid:   grid,
 		width:  width,
 		height: height,
+		tiles:  tiles,
 	}
 }
 

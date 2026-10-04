@@ -19,7 +19,7 @@ func main() {
 	r := rand.New(rand.NewPCG(s1, s2))
 
 	for attempt := range 100 {
-		wave := wfc.NewWave(20, 20)
+		wave := wfc.NewWave(100, 55)
 		if err := wave.Run(r); err != nil {
 			continue
 		}

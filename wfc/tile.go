@@ -11,8 +11,6 @@ const (
 	NumTiles
 )
 
-const AllTiles = 1<<NumTiles - 1
-
 type Direction uint8
 
 const (
@@ -22,6 +20,49 @@ const (
 	Left
 	NumDirections
 )
+
+func (d Direction) Opposite() Direction {
+	switch d {
+	case Up:
+		return Down
+	case Right:
+		return Left
+	case Down:
+		return Up
+	case Left:
+		return Right
+	}
+	panic("wfc: Direction should always have an opposite")
+}
+
+type tileInfo struct {
+	name  string
+	glyph rune
+	rules [NumDirections]Cell
+}
+
+type TileSet struct {
+	tiles []tileInfo
+}
+
+func (ts *TileSet) Add(name string, glyph rune) Tile {
+	if len(ts.tiles) >= 64 {
+		panic("wfc: Cannot add more than 64 tiles to a single tileset")
+	}
+
+	tile := Tile(len(ts.tiles))
+	ts.tiles = append(ts.tiles, tileInfo{name: name, glyph: glyph})
+	return tile
+}
+
+func (ts *TileSet) Connect(t1, t2 Tile) {
+	for d := range NumDirections {
+		ts.tiles[t1].rules[d] |= t2.Bit()
+		ts.tiles[t2].rules[d] |= t1.Bit()
+	}
+}
+
+const AllTiles = 1<<NumTiles - 1
 
 var rules = [NumTiles][NumDirections]Cell{
 	Water: {
@@ -44,18 +85,12 @@ var rules = [NumTiles][NumDirections]Cell{
 	},
 }
 
-var compatible = [NumTiles]Cell{
-	Water: CellOf(Water, Sand),
-	Sand:  AllTiles,
-	Grass: CellOf(Grass, Sand),
-}
-
 func (t Tile) Bit() Cell {
 	return 1 << t
 }
 
 func (t Tile) Allowed(d Direction) Cell {
-	return compatible[t]
+	return rules[t][d]
 }
 
 func (t Tile) String() string {
