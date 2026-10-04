@@ -1,5 +1,7 @@
 package wfc
 
+import "fmt"
+
 type Tile uint8
 
 const (
@@ -8,6 +10,8 @@ const (
 	Grass
 	NumTiles
 )
+
+const AllTiles = 1<<NumTiles - 1
 
 type Direction uint8
 
@@ -46,4 +50,17 @@ func (t Tile) Bit() Cell {
 
 func (t Tile) Allowed(d Direction) Cell {
 	return rules[t][d]
+}
+
+func (t Tile) String() string {
+	switch t {
+	case Water:
+		return "Water"
+	case Sand:
+		return "Sand"
+	case Grass:
+		return "Grass"
+	default:
+		return fmt.Sprintf("Tile(%d)", t)
+	}
 }

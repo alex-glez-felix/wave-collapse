@@ -113,6 +113,17 @@ func TestCellCollapse(t *testing.T) {
 	}
 }
 
+func TestCollapseEmptyPanics(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("Collapse on empty celll did not panic")
+		}
+	}()
+
+	r := rand.New(rand.NewPCG(1, 2))
+	Cell(0).Collapse(r)
+}
+
 func TestCellAllowed(t *testing.T) {
 	tests := []struct {
 		name      string
