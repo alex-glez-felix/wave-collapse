@@ -19,16 +19,6 @@ func (c Cell) Without(t Tile) Cell {
 	return c &^ t.Bit()
 }
 
-func (c Cell) Allowed(d Direction) Cell {
-	var allowed Cell
-	for tile := range NumTiles {
-		if c.Has(tile) {
-			allowed |= tile.Allowed(d)
-		}
-	}
-	return allowed
-}
-
 func (c Cell) Tile() (Tile, bool) {
 	if c.Count() != 1 {
 		return 0, false
@@ -43,17 +33,14 @@ func (c Cell) Collapse(r *rand.Rand) Cell {
 	}
 
 	pick := r.IntN(c.Count())
-	for tile := range NumTiles {
-		if !c.Has(tile) {
-			continue
-		}
+	for c != 0 {
 		if pick == 0 {
-			return CellOf(tile)
+			return CellOf(Tile(bits.TrailingZeros64(uint64(c))))
 		}
 		pick--
+		c &= c - 1
 	}
 	return 0
-
 }
 
 func CellOf(tiles ...Tile) Cell {

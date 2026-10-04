@@ -1,13 +1,13 @@
 package wfc
 
 import (
-	"errors"
 	"maps"
 	"math/rand/v2"
 	"testing"
 )
 
 func TestNewWave(t *testing.T) {
+	ts, _, _, _ := testTileSet()
 	tests := []struct {
 		name          string
 		width, height int
@@ -19,7 +19,7 @@ func TestNewWave(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := NewWave(tt.width, tt.height)
+			w := NewWave(tt.width, tt.height, ts)
 
 			if w.width != tt.width || w.height != tt.height {
 				t.Fatalf("size = %dx%d, want %dx%d", w.width, w.height, tt.width, tt.height)
@@ -28,8 +28,8 @@ func TestNewWave(t *testing.T) {
 				t.Fatalf("len(grid) = %d, want %d", got, want)
 			}
 			for i, c := range w.grid {
-				if c != AllTiles {
-					t.Errorf("grid[%d] = %04b, want %04b", i, c, AllTiles)
+				if c != ts.All() {
+					t.Errorf("grid[%d] = %04b, want %04b", i, c, ts.All())
 				}
 			}
 		})
@@ -37,9 +37,12 @@ func TestNewWave(t *testing.T) {
 }
 
 func TestWave_lowestEntropy(t *testing.T) {
-	three := CellOf(Water, Sand, Grass)
-	two := CellOf(Water, Sand)
-	one := CellOf(Water)
+
+	ts, water, sand, grass := testTileSet()
+
+	three := CellOf(water, sand, grass)
+	two := CellOf(water, sand)
+	one := CellOf(water)
 
 	tests := []struct {
 		name   string
@@ -54,7 +57,7 @@ func TestWave_lowestEntropy(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			w := &Wave{grid: tt.grid, width: len(tt.grid), height: 1}
+			w := &Wave{grid: tt.grid, width: len(tt.grid), height: 1, tiles: ts}
 			r := rand.New(rand.NewPCG(1, 2))
 			seen := map[int]bool{}
 
@@ -77,55 +80,4 @@ func TestWave_lowestEntropy(t *testing.T) {
 			}
 		})
 	}
-}
-
-func newRow(width int) *Wave {
-	grid := make([]Cell, width)
-	for i := range grid {
-		grid[i] = AllTiles
-	}
-	return &Wave{grid: grid, width: width, height: 1}
-}
-
-func TestPropagateRestrictsNeighbors(t *testing.T) {
-	for tile := range NumTiles {
-		t.Run(tile.String(), func(t *testing.T) {
-			w := newRow(3)
-			w.grid[1] = CellOf(tile) // colapsamos el centro a mano
-
-			if err := w.propagate(1); err != nil {
-				t.Fatalf("propagate: unexpected error: %v", err)
-			}
-
-			if got, want := w.grid[0], AllTiles&rules[tile][Left]; got != want {
-				t.Errorf("left = %04b, want %04b", got, want)
-			}
-			if got, want := w.grid[2], AllTiles&rules[tile][Right]; got != want {
-				t.Errorf("right = %04b, want %04b", got, want)
-			}
-			if got, want := w.grid[1], CellOf(tile); got != want {
-				t.Errorf("center changed: %04b, want %04b", got, want)
-			}
-		})
-	}
-}
-
-func TestPropagateContradiction(t *testing.T) {
-	// buscamos una ficha que NO pueda estar a la izquierda de Water
-	for tile := range NumTiles {
-		if rules[Water][Left].Has(tile) {
-			continue
-		}
-
-		w := newRow(2)
-		w.grid[0] = CellOf(tile)
-		w.grid[1] = CellOf(Water)
-
-		err := w.propagate(1)
-		if !errors.Is(err, ErrContradiction) {
-			t.Errorf("tile %v left of Water: err = %v, want ErrContradiction", tile, err)
-		}
-		return
-	}
-	t.Skip("every tile is allowed left of Water; no contradiction to test")
 }

@@ -1,22 +1,40 @@
 package wfc
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+func testTileSet() (*TileSet, Tile, Tile, Tile) {
+	var ts TileSet
+	water := ts.Add("water", '~')
+	sand := ts.Add("sand", '.')
+	grass := ts.Add("grass", '#')
+	ts.Connect(water, water)
+	ts.Connect(water, sand)
+	ts.Connect(sand, sand)
+	ts.Connect(sand, grass)
+	ts.Connect(grass, grass)
+	return &ts, water, sand, grass
+}
 
 func TestTileAllowed(t *testing.T) {
+	ts, water, sand, grass := testTileSet()
+
 	tests := []struct {
 		name      string
 		tile      Tile
 		direction Direction
 		want      Cell
 	}{
-		{"Water up allowed", Water, Up, CellOf(Water, Sand)},
-		{"Grass down allowed", Grass, Down, CellOf(Grass, Sand)},
-		{"Sand down allowed", Sand, Down, CellOf(Grass, Sand, Water)},
+		{"Water up allowed", water, Up, CellOf(water, sand)},
+		{"Grass down allowed", grass, Down, CellOf(grass, sand)},
+		{"Sand down allowed", sand, Down, CellOf(grass, sand, water)},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.tile.Allowed(tt.direction); got != tt.want {
+			if got := ts.Allowed(tt.tile, tt.direction); got != tt.want {
 				t.Errorf("Allowed(%v) on %04b = %v, want %04b", tt.direction, tt.tile, got, tt.want)
 			}
 		})
@@ -95,4 +113,28 @@ func TestTileSetConnectSymmetry(t *testing.T) {
 	ts.Connect(sand, grass)
 
 	assertSymmetric(t, &ts)
+}
+
+func TestTileSetAll(t *testing.T) {
+	tests := []struct {
+		n    int
+		want Cell
+	}{
+		{0, 0},
+		{1, 0b1},
+		{4, 0b1111},
+		{64, ^Cell(0)},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprint(tt.n), func(t *testing.T) {
+			var ts TileSet
+			for range tt.n {
+				ts.Add("t", '?')
+			}
+			if got := ts.All(); got != tt.want {
+				t.Errorf("All() with %d tiles = %b, want %b", tt.n, got, tt.want)
+			}
+		})
+	}
 }

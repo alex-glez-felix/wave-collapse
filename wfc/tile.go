@@ -1,16 +1,6 @@
 package wfc
 
-import "fmt"
-
 type Tile uint8
-
-const (
-	Water Tile = iota
-	Sand
-	Grass
-	NumTiles
-)
-
 type Direction uint8
 
 const (
@@ -32,6 +22,7 @@ func (d Direction) Opposite() Direction {
 	case Left:
 		return Right
 	}
+
 	panic("wfc: Direction should always have an opposite")
 }
 
@@ -62,59 +53,24 @@ func (ts *TileSet) Connect(t1, t2 Tile) {
 	}
 }
 
-const AllTiles = 1<<NumTiles - 1
+func (ts *TileSet) All() Cell {
+	return 1<<len(ts.tiles) - 1
+}
 
-var rules = [NumTiles][NumDirections]Cell{
-	Water: {
-		Up:    CellOf(Water, Sand),
-		Right: CellOf(Water),
-		Down:  CellOf(Water, Sand),
-		Left:  CellOf(Water, Sand),
-	},
-	Sand: {
-		Up:    CellOf(Water, Sand, Grass),
-		Right: CellOf(Sand, Water),
-		Down:  CellOf(Water, Sand, Grass),
-		Left:  CellOf(Grass, Sand),
-	},
-	Grass: {
-		Up:    CellOf(Grass, Sand),
-		Right: CellOf(Grass, Sand),
-		Down:  CellOf(Grass, Sand),
-		Left:  CellOf(Grass),
-	},
+func (ts *TileSet) Allowed(t Tile, d Direction) Cell {
+	return ts.tiles[t].rules[d]
+}
+
+func (ts *TileSet) AllowedFrom(c Cell, d Direction) Cell {
+	var allowed Cell
+	for i := range ts.tiles {
+		if c.Has(Tile(i)) {
+			allowed |= ts.tiles[i].rules[d]
+		}
+	}
+	return allowed
 }
 
 func (t Tile) Bit() Cell {
 	return 1 << t
-}
-
-func (t Tile) Allowed(d Direction) Cell {
-	return rules[t][d]
-}
-
-func (t Tile) String() string {
-	switch t {
-	case Water:
-		return "Water"
-	case Sand:
-		return "Sand"
-	case Grass:
-		return "Grass"
-	default:
-		return fmt.Sprintf("Tile(%d)", t)
-	}
-}
-
-func (t Tile) Glyph() rune {
-	switch t {
-	case Water:
-		return '.'
-	case Sand:
-		return '~'
-	case Grass:
-		return '#'
-	default:
-		return '?'
-	}
 }

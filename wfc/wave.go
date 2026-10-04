@@ -19,7 +19,7 @@ type Wave struct {
 func NewWave(width, height int, tiles *TileSet) *Wave {
 	grid := make([]Cell, width*height)
 	for i := range width * height {
-		grid[i] = AllTiles
+		grid[i] = tiles.All()
 	}
 
 	return &Wave{
@@ -89,7 +89,7 @@ func (w *Wave) propagate(index int) error {
 			}
 
 			before := w.grid[n]
-			intersected := before & cell.Allowed(direction)
+			intersected := before & w.tiles.AllowedFrom(cell, direction)
 
 			if intersected == 0 {
 				return fmt.Errorf("cell %d emptied by cell %d: %w", n, current, ErrContradiction)
@@ -144,7 +144,7 @@ func (w *Wave) String() string {
 			if !ok {
 				b.WriteRune('?')
 			}
-			b.WriteRune(tile.Glyph())
+			b.WriteRune(w.tiles.tiles[tile].glyph)
 		}
 		b.WriteByte('\n')
 	}
