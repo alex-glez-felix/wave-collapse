@@ -54,7 +54,7 @@ func TestCellWithout(t *testing.T) {
 	}{
 		{"Remove water", 0b0001, Water, 0b0000},
 		{"Remove water from nothing", 0b0000, Water, 0b0000},
-		{"Remove sand", 0b1111, Sand, 0b1111},
+		{"Remove sand", 0b1111, Sand, 0b1101},
 	}
 
 	for _, tt := range tests {
